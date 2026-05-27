@@ -420,11 +420,23 @@ ui <- shinydashboard::dashboardPage(
             tags$style(HTML("
                 body, html { font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif; }
 
-                /* Header: Hanyang teal */
-                .skin-blue .main-header .logo { background-color: #156f67; color: #fff; font-weight: 700; }
-                .skin-blue .main-header .logo:hover { background-color: #0f5f59; }
-                .skin-blue .main-header .navbar { background-color: #156f67; }
-                .skin-blue .main-header .navbar .sidebar-toggle:hover { background-color: #0f5f59; }
+                /* Header: white logo area */
+                .skin-blue .main-header .logo {
+                    background-color: #ffffff;
+                    color: #156f67;
+                    font-weight: 700;
+                    border-right: 1px solid rgba(21,111,103,.18);
+                }
+                .skin-blue .main-header .logo:hover { background-color: #ffffff; color: #0f5f59; }
+                .skin-blue .main-header .navbar {
+                    background-color: #ffffff;
+                    border-bottom: 1px solid rgba(21,111,103,.16);
+                }
+                .skin-blue .main-header .navbar .sidebar-toggle { color: #156f67; }
+                .skin-blue .main-header .navbar .sidebar-toggle:hover {
+                    background-color: rgba(21,111,103,.08);
+                    color: #0f5f59;
+                }
 
                 /* Sidebar: original teal gradient */
                 .skin-blue .main-sidebar, .skin-blue .left-side {
