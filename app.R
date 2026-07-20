@@ -52,15 +52,18 @@ if (is_webr && file.exists(local_noto_font) && requireNamespace("webr", quietly 
         invisible(webr::eval_js(sprintf(
             paste0(
                 "(() => {",
-                "const bytes = Module.FS.readFile('%s');",
-                "const font = new FontFace('ASP Noto Sans KR', bytes);",
+                "const source = Module.FS.readFile('%s');",
+                "const bytes = Uint8Array.from(source).buffer;",
+                "const font = new FontFace('asp_noto_sans_kr', bytes);",
                 "self.fonts.add(font);",
+                "globalThis.aspNotoSansKRFont = font;",
+                "globalThis.aspNotoSansKRReady = font.load();",
                 "return font.status;",
                 "})()"
             ),
             font_path_js
         )))
-        options(asp_plot_family = "ASP Noto Sans KR")
+        options(asp_plot_family = "asp_noto_sans_kr")
     }, silent = TRUE)
 } else if (!is_webr) {
     try({
