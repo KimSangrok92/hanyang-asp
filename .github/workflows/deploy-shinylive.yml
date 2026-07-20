@@ -17,3 +17,5 @@ concurrency:
 jobs:
   deploy:
     uses: posit-dev/r-shinylive/.github/workflows/deploy-app.yaml@actions-v1
+    with:
+      cache-version: "graphics-fix-20260720"

@@ -37,28 +37,34 @@ library(tidyr)
 
 library(bslib)
 
-suppressWarnings(try(library(showtext), silent = TRUE))
-suppressWarnings(try(library(sysfonts), silent = TRUE))
+is_webr <- grepl(
+    "emscripten|wasm",
+    paste(R.version$platform, R.version$os),
+    ignore.case = TRUE
+)
 
-options(asp_plot_family = "Noto Sans KR")
+options(asp_plot_family = if (is_webr) "sans" else "Noto Sans KR")
 local_noto_font <- file.path("www", "fonts", "NotoSansKR-Regular.otf")
-try({
-    if (requireNamespace("showtext", quietly = TRUE) && requireNamespace("sysfonts", quietly = TRUE)) {
-        font_registered <- FALSE
-        if (file.exists(local_noto_font)) {
-            sysfonts::font_add("noto_sans_kr", regular = local_noto_font)
-            font_registered <- TRUE
+
+if (!is_webr) {
+    try({
+        if (requireNamespace("showtext", quietly = TRUE) && requireNamespace("sysfonts", quietly = TRUE)) {
+            font_registered <- FALSE
+            if (file.exists(local_noto_font)) {
+                sysfonts::font_add("noto_sans_kr", regular = local_noto_font)
+                font_registered <- TRUE
+            }
+            else {
+                suppressWarnings(try(sysfonts::font_add_google("Noto Sans KR", "noto_sans_kr"), silent = TRUE))
+                font_registered <- "noto_sans_kr" %in% sysfonts::font_families()
+            }
+            if (isTRUE(font_registered)) {
+                showtext::showtext_auto(enable = TRUE)
+                options(asp_plot_family = "noto_sans_kr")
+            }
         }
-        else {
-            suppressWarnings(try(sysfonts::font_add_google("Noto Sans KR", "noto_sans_kr"), silent = TRUE))
-            font_registered <- "noto_sans_kr" %in% sysfonts::font_families()
-        }
-        if (isTRUE(font_registered)) {
-            showtext::showtext_auto(enable = TRUE)
-            options(asp_plot_family = "noto_sans_kr")
-        }
-    }
-}, silent = TRUE)
+    }, silent = TRUE)
+}
 
 `%||%` <- function(x, y) if (is.null(x) || length(x) == 0) y else x
 
