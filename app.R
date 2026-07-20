@@ -47,38 +47,38 @@ options(asp_plot_family = if (is_webr) "sans" else "Noto Sans KR")
 local_noto_font <- file.path("www", "fonts", "NotoSansKR-Regular.otf")
 
 if (is_webr) {
-    message(sprintf(
-        "[ASP webR font] cwd=%s exists=%s namespace=%s",
-        getwd(),
-        file.exists(local_noto_font),
-        requireNamespace("webr", quietly = TRUE)
-    ))
-    if (file.exists(local_noto_font) && requireNamespace("webr", quietly = TRUE)) {
-        tryCatch({
-            font_path_js <- gsub("\\\\", "/", local_noto_font)
-            font_status <- as.character(webr::eval_js(sprintf(
+    if (file.exists(local_noto_font)) {
+        web_font_dir <- file.path(path.expand("~"), "fonts")
+        web_noto_font <- file.path(web_font_dir, basename(local_noto_font))
+        cairo_font_ready <- try({
+            dir.create(web_font_dir, recursive = TRUE, showWarnings = FALSE)
+            isTRUE(file.copy(local_noto_font, web_noto_font, overwrite = TRUE)) &&
+                file.exists(web_noto_font)
+        }, silent = TRUE)
+
+        if (isTRUE(cairo_font_ready)) {
+            options(asp_plot_family = "Noto Sans KR")
+        }
+
+        if (isTRUE(cairo_font_ready) && requireNamespace("webr", quietly = TRUE)) {
+            try({
+                font_path_js <- gsub("\\\\", "/", web_noto_font)
+                invisible(webr::eval_js(sprintf(
                 paste0(
                     "(() => {",
                     "const source = Module.FS.readFile('%s');",
                     "const bytes = Uint8Array.from(source).buffer;",
-                    "const font = new FontFace('asp_noto_sans_kr', bytes);",
+                    "const font = new FontFace('Noto Sans KR', bytes);",
                     "self.fonts.add(font);",
                     "globalThis.aspNotoSansKRFont = font;",
                     "globalThis.aspNotoSansKRReady = font.load();",
-                    "return [font.status, self.fonts.check('16px asp_noto_sans_kr', '한글'), source.length, bytes.byteLength].join('|');",
+                    "return font.status;",
                     "})()"
                 ),
                 font_path_js
-            )))
-            options(asp_plot_family = "asp_noto_sans_kr")
-            message(sprintf(
-                "[ASP webR font] status=%s family=%s",
-                font_status,
-                getOption("asp_plot_family")
-            ))
-        }, error = function(e) {
-            message("[ASP webR font] error=", conditionMessage(e))
-        })
+                )))
+            }, silent = TRUE)
+        }
     }
 } else {
     try({
