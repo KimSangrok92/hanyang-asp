@@ -46,7 +46,23 @@ is_webr <- grepl(
 options(asp_plot_family = if (is_webr) "sans" else "Noto Sans KR")
 local_noto_font <- file.path("www", "fonts", "NotoSansKR-Regular.otf")
 
-if (!is_webr) {
+if (is_webr && file.exists(local_noto_font) && requireNamespace("webr", quietly = TRUE)) {
+    try({
+        font_path_js <- gsub("\\\\", "/", local_noto_font)
+        invisible(webr::eval_js(sprintf(
+            paste0(
+                "(() => {",
+                "const bytes = Module.FS.readFile('%s');",
+                "const font = new FontFace('ASP Noto Sans KR', bytes);",
+                "self.fonts.add(font);",
+                "return font.status;",
+                "})()"
+            ),
+            font_path_js
+        )))
+        options(asp_plot_family = "ASP Noto Sans KR")
+    }, silent = TRUE)
+} else if (!is_webr) {
     try({
         if (requireNamespace("showtext", quietly = TRUE) && requireNamespace("sysfonts", quietly = TRUE)) {
             font_registered <- FALSE
@@ -424,7 +440,14 @@ ui <- shinydashboard::dashboardPage(
             tags$link(rel = "preconnect", href = "https://fonts.gstatic.com", crossorigin = "anonymous"),
             tags$link(rel = "stylesheet", href = "https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap"),
             tags$style(HTML("
-                body, html { font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif; }
+                @font-face {
+                    font-family: 'ASP Noto Sans KR';
+                    src: url('fonts/NotoSansKR-Regular.otf') format('opentype');
+                    font-weight: 400;
+                    font-style: normal;
+                    font-display: swap;
+                }
+                body, html { font-family: 'ASP Noto Sans KR', 'Noto Sans KR', 'Malgun Gothic', sans-serif; }
 
                 /* Header: white logo area */
                 .skin-blue .main-header .logo {
